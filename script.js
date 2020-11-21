@@ -2,7 +2,7 @@ $("#search-btn").on("click",function(){
     var city = $("#search-input").val();
     cities.push(city);
     storeThisCity();
-    searchWeather(city)
+    searchWeather(city);
 });
 
 var cities = ['Killeen', 'Austin', 'Round Rock']
@@ -39,10 +39,13 @@ $(document).on('click', '.showWeather', function(){
 });
 
 function searchWeather(x) {
+    $('.today-wth').empty();
+    $('.forecast').empty();
     $.ajax({
         type: 'GET',
         url: "https://api.openweathermap.org/data/2.5/weather?q="+x+"&appid=91c1d0e4e6ad5ba477f27aa09d5d56d5&units=imperial"
     }).then(function(data){
+        console.log(data);
         let d = new Date();
         let date = $('<p>').text(d)
         let cityName = $('<h2>').text(data.name);
@@ -52,9 +55,51 @@ function searchWeather(x) {
         $(a).append(cityName).append(date).append(img);
 
         let b = $('<div>');
-        
+        let temp = $('<div>').text('Temperature: ' + data.main.temp + '´F');
+        let humidity = $('<div>').text('Humidity: ' + data.main.humidity + '%');
+        let wind = $('<div>').text('Wind Speed: ' + data.wind.speed + 'MPH');
+        let uv = $('<div>').text('UV: ');
 
-        $('.today-wth').append(a);
+        $(b).append(temp, humidity, wind, uv);
+
+        $('.today-wth').append(a, b);
+    });
+
+    $.ajax({
+        type: 'GET',
+        url: "https://api.openweathermap.org/data/2.5/forecast?q="+x+"&appid=91c1d0e4e6ad5ba477f27aa09d5d56d5&units=imperial"
+    }).then(function(data){
+        console.log(data);
+
+        let title = $('<h2>').text('5-day Forecast');
+
+        let container = $('<div>').addClass('container');
+        let row = $('<div>').addClass('row');
+        let col = $('<div>').addClass('col-md-4 col-lg-2 p-2 bg-info');
+
+        let dates = [0, 8, 16, 24, 32];
+
+        function getDateWeather(x) {
+            let date = data.list[x];
+            let d = date.dt_txt;
+            let newDate = $('<p>').text(d);
+            let img = $("<img>").attr("src", "http://openweathermap.org/img/w/" + date.weather[0].icon + ".png");
+            let temp = $('<div>').text('Temperature: ' + date.main.temp + '´F');
+        let humidity = $('<div>').text('Humidity: ' + date.main.humidity + '%');
+        
+        let dateCol = $('<div>').addClass('col-md-4 col-lg-2 p-2 bg-info').append(newDate, img, temp, humidity)
+
+        $(row).append(dateCol);
+    }
+    
+    for (let i = 0; i < dates.length; i++){
+        getDateWeather(dates[i]);
+    }
+    
+    $(row).append(col);
+        $(container).append(row);
+
+        $('.forecast').append(title, container)
     })
 }
 
