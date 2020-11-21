@@ -58,9 +58,23 @@ function searchWeather(x) {
         let temp = $('<div>').text('Temperature: ' + data.main.temp + '´F');
         let humidity = $('<div>').text('Humidity: ' + data.main.humidity + '%');
         let wind = $('<div>').text('Wind Speed: ' + data.wind.speed + 'MPH');
-        let uv = $('<div>').text('UV: ');
 
-        $(b).append(temp, humidity, wind, uv);
+        let lat = data.coord.lat;
+        let lon = data.coord.lon;
+        let uvValue;
+        
+        $.ajax({
+            type: 'GET',
+            url: "https://api.openweathermap.org/data/2.5/uvi?lat="+lat+"&lon="+lon+"&appid=91c1d0e4e6ad5ba477f27aa09d5d56d5"
+        }).then(function(data){
+            console.log(data);
+            uvValue = data.value;
+            let uv = $('<div>').text('UV: ' + uvValue);
+            $(b).append(uv)
+        });
+        
+
+        $(b).append(temp, humidity, wind);
 
         $('.today-wth').append(a, b);
     });
